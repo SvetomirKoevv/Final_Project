@@ -179,7 +179,7 @@ public class AppDbContext : DbContext
 
         #endregion
 
-        #region Seed Data
+        #region Data Seeding
 
         modelBuilder.Entity<Role>()
             .HasData(
