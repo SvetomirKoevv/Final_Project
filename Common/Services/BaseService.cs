@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Common.Entities;
 using Common.Persistance;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +17,31 @@ where T : BaseEntity
         itmes = _context.Set<T>();
     }
 
-    public List<T> GetAll()
+    public List<T> GetAll(
+        Expression<Func<T, bool>> filter,
+        string sortProperty,
+        bool sortAscending,
+        int pageNumber,
+        int pageSize
+    )
     {
-        return itmes.ToList();
+        IQueryable<T> query = itmes.Where(filter);
+
+        if (sortAscending)
+        {
+            query = query.OrderBy(e => EF.Property<object>(e, sortProperty));
+        }
+        else
+        {
+            query = query.OrderByDescending(e => EF.Property<object>(e, sortProperty));
+        }
+
+        var result = query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        
+        return result;
     }
 
     public T GetById(int id)

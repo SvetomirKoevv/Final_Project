@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Common.Entities.BEntities;
 using Common.Entities.MTMTables;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Common.Persistance;
 
@@ -17,11 +18,26 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // PC - "Server=DESKTOP-RD8LV0K;Database=SportsDb;User ID=svetomir;Password=svetomir;Encrypt=False;"
-        // LAPTOP - "Server=localhost\\SQLEXPRESS;Database=SportsDb;User ID=loginname;Password=password;Encrypt=False;"
-        
+        // LocalDB (local development)
         if (!optionsBuilder.IsConfigured)
-            optionsBuilder.UseSqlServer("Server=DESKTOP-RD8LV0K;Database=SportsDb;User ID=svetomir;Password=svetomir;Encrypt=False;");
+        {
+            optionsBuilder.UseSqlServer(
+                "Server=(localdb)\\mssqllocaldb;Database=SportsDb;Integrated Security=true;Encrypt=False;",
+                sqlServerOptionsAction: sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(3),
+                        errorNumbersToAdd: null
+                    );
+                }
+            );
+            
+            optionsBuilder.ConfigureWarnings(w =>
+                w.Ignore(RelationalEventId.PendingModelChangesWarning)
+            );
+        }
+       
         base.OnConfiguring(optionsBuilder);
     }
 
