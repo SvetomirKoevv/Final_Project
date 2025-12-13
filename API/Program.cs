@@ -27,10 +27,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters()
         {
-            ValidIssuer = "fmi",
-            ValidAudience = "front-end",
+            ValidIssuer = "svetomir",
+            ValidAudience = "plvduni",
             IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.ASCII.GetBytes("!Password123!Password123!Password123"))
+                        new SymmetricSecurityKey(Encoding.ASCII.GetBytes("SuperSecretKeyThatNooneWillEverGuess123!")),
         };
     });
     

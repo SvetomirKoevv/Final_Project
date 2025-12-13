@@ -2,7 +2,6 @@ using System.Runtime.CompilerServices;
 using Common.Entities.BEntities;
 using Common.Entities.MTMTables;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Common.Persistance;
 
@@ -16,27 +15,13 @@ public class AppDbContext : DbContext
     public DbSet<TrainingSession> TrainingSessions { get; set; }
     public DbSet<User> Users { get; set; }
 
+    public DbSet<UserRoles> UserRoles { get; set; }
+    public DbSet<SessionAttendees> SessionAttendees { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // LocalDB (local development)
         if (!optionsBuilder.IsConfigured)
-        {
-            optionsBuilder.UseSqlServer(
-                "Server=(localdb)\\mssqllocaldb;Database=SportsDb;Integrated Security=true;Encrypt=False;",
-                sqlServerOptionsAction: sqlOptions =>
-                {
-                    sqlOptions.EnableRetryOnFailure(
-                        maxRetryCount: 3,
-                        maxRetryDelay: TimeSpan.FromSeconds(3),
-                        errorNumbersToAdd: null
-                    );
-                }
-            );
-            
-            optionsBuilder.ConfigureWarnings(w =>
-                w.Ignore(RelationalEventId.PendingModelChangesWarning)
-            );
-        }
+            optionsBuilder.UseSqlServer("Data Source=DESKTOP-RD8LV0K;User ID=svetomir;Password=svetomir;TrustServerCertificate=True;");
        
         base.OnConfiguring(optionsBuilder);
     }
@@ -58,8 +43,8 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<User>()
-            .HasMany<Role>()
-            .WithMany()
+            .HasMany(u => u.Roles)
+            .WithMany(r => r.Users)
             .UsingEntity<UserRoles>(
                 u => u
                         .HasOne(ur => ur.Role)
@@ -75,8 +60,8 @@ public class AppDbContext : DbContext
             );
 
         modelBuilder.Entity<User>()
-            .HasMany<TrainingSession>()
-            .WithMany()
+            .HasMany(u => u.TrainingSessions)
+            .WithMany(ts => ts.Users)
             .UsingEntity<SessionAttendees>(
                 u => u
                         .HasOne(sa => sa.TrainingSession)
@@ -136,8 +121,8 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<TrainingSession>()
-            .HasMany<Equipment>()
-            .WithMany()
+            .HasMany(ts => ts.Equipments)
+            .WithMany(e => e.TrainingSessions)
             .UsingEntity<EquipmentRentals>(
                 er => er
                         .HasOne(e => e.Equipment)
@@ -159,8 +144,8 @@ public class AppDbContext : DbContext
             .HasKey(s => s.Id);
 
         modelBuilder.Entity<Sport>()
-            .HasMany<Coach>()
-            .WithMany()
+            .HasMany(s => s.Coaches)
+            .WithMany(c => c.Sports)
             .UsingEntity<CoachSports>(
                 s => s
                         .HasOne(cs => cs.Coach)

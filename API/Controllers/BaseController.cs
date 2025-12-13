@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using API.Infrastructure.RequestDTOs.Shared;
+using API.Infrastructure.ResponseDTOs.Shared;
 using API.Services;
 using Common.Entities;
 using Common.Entities.Other;
@@ -41,7 +42,7 @@ where EResponse : new()
             : "Id";
 
         EService _service = new EService();
-        var items = _service.GetAll(
+        var items = _service.GetAllFiltered(
             filter,
             filterModel.SortProperty,
             filterModel.SortAscending,
@@ -49,7 +50,13 @@ where EResponse : new()
             filterModel.Pager.PageSize
         );
 
-        return Ok(ResultSetGenerator<List<E>>.Success(items));
+        EntityGetResponse<E, EGetRequest> response = new EntityGetResponse<E, EGetRequest>
+        {
+            Items = items,
+            FilterInfo = filterModel
+        };
+
+        return Ok(ResultSetGenerator<EntityGetResponse<E, EGetRequest>>.Success(response));
     }
 
     [HttpGet]
@@ -74,7 +81,10 @@ where EResponse : new()
                             }));
         }
 
-        return Ok(ResultSetGenerator<E>.Success(item));
+        EResponse response = new EResponse();
+        PopulateResponse(item, response);
+
+        return Ok(ResultSetGenerator<EResponse>.Success(response));
     }
 
     [HttpPost]
@@ -102,7 +112,7 @@ where EResponse : new()
 
     [HttpPut]
     [Route("{id}")]
-    public IActionResult Post([FromQuery] int id, [FromBody] ERequest model)
+    public IActionResult Put([FromQuery] int id, [FromBody] ERequest model)
     {
         ValidationResult result = ValidationService<ERequest>.Validate(model);
 
@@ -160,8 +170,11 @@ where EResponse : new()
                                 }
                             }));
 
-        var deletedItem = _service.Delete(id);
+        E deletedItem = _service.Delete(id);
 
-        return Ok(ResultSetGenerator<E>.Success(deletedItem));
+        EResponse response = new EResponse();
+        PopulateResponse(deletedItem, response);
+
+        return Ok(ResultSetGenerator<EResponse>.Success(response));
     }
 }

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using Common.Entities;
 using Common.Persistance;
@@ -8,8 +9,8 @@ namespace Common.Services;
 public class BaseService<T>
 where T : BaseEntity
 {
-    private readonly AppDbContext _context;
-    private readonly DbSet<T> itmes;
+    protected readonly AppDbContext _context;
+    protected readonly DbSet<T> itmes;
 
     public BaseService()
     {
@@ -17,12 +18,16 @@ where T : BaseEntity
         itmes = _context.Set<T>();
     }
 
-    public List<T> GetAll(
-        Expression<Func<T, bool>> filter,
-        string sortProperty,
-        bool sortAscending,
-        int pageNumber,
-        int pageSize
+    public async Task<List<T>> GetAll()
+    {
+        return await itmes.ToListAsync();
+    }
+    public async Task<List<T>> GetAllFiltered(
+        Expression<Func<T, bool>> filter = null,
+        string sortProperty = null,
+        bool sortAscending = true,
+        int pageNumber = 1,
+        int pageSize = 10
     )
     {
         IQueryable<T> query = itmes.Where(filter);
@@ -36,38 +41,38 @@ where T : BaseEntity
             query = query.OrderByDescending(e => EF.Property<object>(e, sortProperty));
         }
 
-        var result = query
+        var result = await query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .ToList();
+            .ToListAsync();
         
         return result;
     }
 
-    public T GetById(int id)
+    public async Task<T> GetById(int id)
     {
-        return itmes.FirstOrDefault(i => i.Id == id);
+        return await itmes.FirstOrDefaultAsync(i => i.Id == id);
     }
 
-    public void Create(T item)
+    public async Task Create(T item)
     {
         itmes.Add(item);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void Update(T item)
+    public async Task Update(T item)
     {
         itmes.Update(item);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public T Delete(int id)
+    public async Task<T> Delete(int id)
     {
-        T item = GetById(id);
+        T item = await GetById(id);
         if (item != null)
         {
             itmes.Remove(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
         return item;
     }

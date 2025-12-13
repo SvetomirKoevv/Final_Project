@@ -19,7 +19,7 @@ public static class ResultSetGenerator<T>
         return success;
     }
 
-    public static ResultSet<T> Failure<T>(T item, ValidationResult modelState)
+    public static ResultSet<T> Failure(T item, ValidationResult modelState)
     {
         List<ResultSetError> errors = new List<ResultSetError>();
 

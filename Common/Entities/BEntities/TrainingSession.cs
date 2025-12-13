@@ -8,4 +8,7 @@ public class TrainingSession : BaseEntity
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public int MaxParticipants { get; set; }
+
+    public virtual List<Equipment> Equipments { get; set; }
+    public virtual List<User> Users { get; set; }
 }
