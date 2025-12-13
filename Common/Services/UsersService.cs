@@ -30,4 +30,11 @@ public class UsersService : BaseService<User>
             await _context.SaveChangesAsync();
         }
     }
+
+    public async Task ChangeMembershipAsync(int userId, int membershipId)
+    {
+        User user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        user.MembershipId = membershipId;
+        await _context.SaveChangesAsync();
+    }
 }

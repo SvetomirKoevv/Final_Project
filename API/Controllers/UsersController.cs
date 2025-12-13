@@ -67,254 +67,82 @@ public class UsersController : BaseController<User, UsersService, UserRequest, U
     [Route("{userId}/changeMembership")]
     public async Task<IActionResult> ChangeMembership([FromRoute] int userId, [FromQuery] int membershipId)
     {
-        if (membershipId <= 0)
-        {
-            return BadRequest(ResultSetGenerator<int>.Failure(membershipId, new List<ResultSetError>
+        return await ReturnFromValidationModel<int, UserPostResponse>(
+            await new FullEntityRequestValidator<User, UsersService, Membership, MembershipService>()
+                .Validate(userId, membershipId),
+            new TwoIdsDelegate<UserPostResponse>(async (uId, mId) =>
             {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "Invalid Id!" }
-                }
+                UsersService usersService = new UsersService();
+                await usersService.ChangeMembershipAsync(uId, mId);
+                
+                User user = await usersService.GetById(uId);
+                UserPostResponse userResponse = new UserPostResponse();
+                
+                PopulateResponse(user, userResponse);
+                return ResultSetGenerator<UserPostResponse>.Success(userResponse);
             }));
-        }
-
-        MembershipService membershipService = new MembershipService();
-        if (membershipService.GetById(membershipId) == null)
-        {
-            return NotFound(ResultSetGenerator<int>.Failure(membershipId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "No Membership with this Id!" }
-                }
-            }));
-        }
-
-        UsersService service = new UsersService();
-        User user = await service.GetById(userId);
-
-        if (user == null)
-        {
-            return NotFound(ResultSetGenerator<int>.Failure(membershipId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "No User with this Id!" }
-                }
-            }));
-        }
-
-        user.MembershipId = membershipId;
-
-        await service.Update(user);
-
-        UserPostResponse userResponse = new UserPostResponse();
-        PopulateResponse(user, userResponse);
-
-        return Ok(ResultSetGenerator<UserPostResponse>.Success(userResponse));
     }
 
     [HttpPost]
     [Route("{userId}/bookAppointment")]
     public async Task<IActionResult> BookAppointment([FromRoute] int userId, [FromQuery] int trainingSessionId)
     {
-        if (userId <= 0)
-        {
-            return BadRequest(ResultSetGenerator<int>.Failure(userId, new List<ResultSetError>
+        return await ReturnFromValidationModel<int, TrainingSession>(
+            await new FullEntityRequestValidator<User, UsersService, TrainingSession, TrainingSessionService>()
+                .Validate(userId, trainingSessionId),
+            new TwoIdsDelegate<TrainingSession>(async (uId, tsId) =>
             {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "Invalid User Id!" }
-                }
+                UsersService usersService = new UsersService();
+                User user = await usersService.GetById(uId);
+
+                TrainingSessionService trainingSessionService = new TrainingSessionService();
+                TrainingSession trainingSession = await trainingSessionService.GetById(tsId);
+                
+                trainingSession.Users.Add(user);
+                await trainingSessionService.Update(trainingSession);
+
+                return ResultSetGenerator<TrainingSession>.Success(trainingSession);
             }));
-        }
 
-        if (trainingSessionId <= 0)
-        {
-            return BadRequest(ResultSetGenerator<int>.Failure(trainingSessionId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "Invalid TrainingSession Id!" }
-                }
-            }));
-        }
-
-        TrainingSessionService trainingSessionService = new TrainingSessionService();
-        if (trainingSessionService.GetById(trainingSessionId) == null)
-        {
-            return NotFound(ResultSetGenerator<int>.Failure(trainingSessionId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "No Training seassion with this Id!" }
-                }
-            }));
-        }
-
-        UsersService service = new UsersService();
-        User user = await service.GetById(userId);
-
-        if (user == null)
-        {
-            return Unauthorized(ResultSetGenerator<int>.Failure(trainingSessionId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "User",
-                    Mesages = new List<string> { "User must be logged in!" }
-                }
-            }));
-        }
-
-        TrainingSession trainingSession = await trainingSessionService.GetById(trainingSessionId);
-
-        if (trainingSession.Users == null)
-        {
-            trainingSession.Users = new List<User>();
-        }
-
-        trainingSession.Users.Add(user);
-        await trainingSessionService.Update(trainingSession);
-
-        return Ok(ResultSetGenerator<TrainingSession>.Success(trainingSession));
     }
 
     [HttpPut]
     [Route("{userId}/addRole")]
     public async Task<IActionResult> AddRole([FromRoute] int userId, [FromQuery] int roleId)
     {
-        if (userId <= 0)
-        {
-            return BadRequest(ResultSetGenerator<int>.Failure(userId, new List<ResultSetError>
+        return await ReturnFromValidationModel<int, UserPostResponse>(
+            await new FullEntityRequestValidator<User, UsersService, Role, RoleService>()
+                .Validate(userId, roleId),
+            new TwoIdsDelegate<UserPostResponse>(async (uId, rId) =>
             {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "Invalid User Id!" }
-                }
-            }));
-        }
-        if (roleId <= 0)
-        {
-            return BadRequest(ResultSetGenerator<int>.Failure(roleId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "Invalid Role Id!" }
-                }
-            }));
-        }
-        UsersService service = new UsersService();
-        User user = await service.GetById(userId);
-        if (user == null)
-        {
-            return NotFound(ResultSetGenerator<int>.Failure(userId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "No User with this Id!" }
-                }
-            }));
-        }
-        RoleService roleService = new RoleService();
-        Role role = await roleService.GetById(roleId);
-        if (role == null)
-        {
-            return NotFound(ResultSetGenerator<int>.Failure(roleId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "No Role with this Id!" }
-                }
-            }));
-        }
+                UsersService usersService = new UsersService();
+                await usersService.AddRoleAsync(userId, roleId);
 
-        if (user.Roles == null)
-        {
-            user.Roles = new List<Role>();
-        }
-
-        UsersService usersService = new UsersService();
-        await usersService.AddRoleAsync(userId, roleId);
-
-        UserPostResponse userResponse = new UserPostResponse();
-        PopulateResponse(user, userResponse);
-        return Ok(ResultSetGenerator<UserPostResponse>.Success(userResponse));
+                User user = await usersService.GetById(userId);
+                UserPostResponse userResponse = new UserPostResponse();
+                PopulateResponse(user, userResponse);
+                return ResultSetGenerator<UserPostResponse>.Success(userResponse);
+            }));
     }
     
     [HttpPut]
     [Route("{userId}/removeRole")]
     public async Task<IActionResult> RemoveRole([FromRoute] int userId, [FromQuery] int roleId)
     {
-        if (userId <= 0)
-        {
-            return BadRequest(ResultSetGenerator<int>.Failure(userId, new List<ResultSetError>
+        return await ReturnFromValidationModel<int, UserPostResponse>(
+            await new FullEntityRequestValidator<User, UsersService, Role, RoleService>()
+                .Validate(userId, roleId),
+            new TwoIdsDelegate<UserPostResponse>(async (uId, rId) =>
             {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "Invalid User Id!" }
-                }
+                UsersService usersService = new UsersService();
+                await usersService.RemoveRoleAsync(userId, roleId);
+                
+                User user = await usersService.GetById(userId);
+                UserPostResponse userResponse = new UserPostResponse();
+                
+                PopulateResponse(user, userResponse);
+                return ResultSetGenerator<UserPostResponse>.Success(userResponse);
             }));
-        }
-        if (roleId <= 0)
-        {
-            return BadRequest(ResultSetGenerator<int>.Failure(roleId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "Invalid Role Id!" }
-                }
-            }));
-        }
-        UsersService service = new UsersService();
-        User user = await service.GetById(userId);
-        if (user == null)
-        {
-            return NotFound(ResultSetGenerator<int>.Failure(userId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "No User with this Id!" }
-                }
-            }));
-        }
-        RoleService roleService = new RoleService();
-        Role role = await roleService.GetById(roleId);
-        if (role == null)
-        {
-            return NotFound(ResultSetGenerator<int>.Failure(roleId, new List<ResultSetError>
-            {
-                new ResultSetError
-                {
-                    Name = "Id",
-                    Mesages = new List<string> { "No Role with this Id!" }
-                }
-            }));
-        }
-
-        if (user.Roles == null)
-        {
-            user.Roles = new List<Role>();
-        }
-
-        UsersService usersService = new UsersService();
-        await usersService.RemoveRoleAsync(userId, roleId);
-        
-        UserPostResponse userResponse = new UserPostResponse();
-        PopulateResponse(user, userResponse);
-        return Ok(ResultSetGenerator<UserPostResponse>.Success(userResponse));
+       
     }
 }

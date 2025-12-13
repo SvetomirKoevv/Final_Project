@@ -17,6 +17,7 @@ public class AppDbContext : DbContext
 
     public DbSet<UserRoles> UserRoles { get; set; }
     public DbSet<SessionAttendees> SessionAttendees { get; set; }
+    public DbSet<CoachSports> CoachSports { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
