@@ -143,6 +143,5 @@ public class UsersController : BaseController<User, UsersService, UserRequest, U
                 PopulateResponse(user, userResponse);
                 return ResultSetGenerator<UserPostResponse>.Success(userResponse);
             }));
-       
     }
 }

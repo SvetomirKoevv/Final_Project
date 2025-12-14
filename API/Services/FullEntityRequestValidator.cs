@@ -60,7 +60,7 @@ where EService : BaseService<E>, new()
                     new ResultSetError
                     {
                         Name = "Id",
-                        Mesages = new List<string>() { "Coach not found!" }
+                        Mesages = new List<string>() { $"{typeof(T).Name} not found!" }
                     }
                 },
                 ResponseType = "NotFound"
@@ -80,7 +80,7 @@ where EService : BaseService<E>, new()
                     new ResultSetError
                     {
                         Name = "Id",
-                        Mesages = new List<string>() { "Sport not found!" }
+                        Mesages = new List<string>() { $"{typeof(E).Name} not found!" }
                     }
                 },
                 ResponseType = "NotFound"

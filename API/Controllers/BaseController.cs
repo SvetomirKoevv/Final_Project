@@ -191,7 +191,6 @@ where EResponse : new()
                     validationModel.Data,
                     validationModel.Errors)));
         }
-
         else if (validationModel.ResponseType == "NotFound")
         {
             return Task.FromResult<IActionResult>(NotFound(
@@ -200,9 +199,8 @@ where EResponse : new()
                     validationModel.Errors)));
         }
 
-        delegate_.DynamicInvoke();
+        R result = (R)delegate_.DynamicInvoke();
         
-        return Task.FromResult<IActionResult>(Ok(
-            ResultSetGenerator<V>.Success(validationModel.Data)));
+        return Task.FromResult<IActionResult>(Ok(ResultSetGenerator<R>.Success(result)));
     }
 }
