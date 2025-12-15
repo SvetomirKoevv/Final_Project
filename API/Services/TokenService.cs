@@ -10,10 +10,11 @@ public class TokenService
 {
     public string CreateToken(User user)
     {
-       Claim[] claims = new Claim[]
+        
+        Claim[] claims = new Claim[]
         {
             new Claim("username", user.Username),
-            new Claim("role", "User"),
+            new Claim(ClaimTypes.Role, user.Roles.OrderBy(r => r.Id).First().Name),
             new Claim("userId", user.Id.ToString())
         };
 
@@ -21,8 +22,8 @@ public class TokenService
         var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken token = new JwtSecurityToken(
-            issuer: "fmi",
-            audience: "front-end",
+            issuer: "svetomir",
+            audience: "plvduni",
             claims: claims,
             expires: DateTime.Now.AddMinutes(10),
             signingCredentials: cred

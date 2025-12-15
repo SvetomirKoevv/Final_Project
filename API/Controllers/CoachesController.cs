@@ -6,11 +6,13 @@ using Common.Entities.BEntities;
 using Common.Entities.MTMTables;
 using Common.Entities.Other;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
+[Authorize(Roles = "Administrator, Manager")]
 [Route("api/[controller]")]
 public class CoachesController : BaseController<Coach, CoachService, CoachRequest, CoachGetRequest, CoachResponse>
 {

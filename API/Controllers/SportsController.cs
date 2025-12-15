@@ -3,11 +3,13 @@ using API.Infrastructure.RequestDTOs.Sport;
 using API.Infrastructure.ResponseDTOs.Sport;
 using Common.Entities.BEntities;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
+[Authorize(Roles = "Administrator, Manager, Coach")]
 [Route("api/[controller]")]
 public class SportsController : BaseController<Sport, SportService, SportRequest, SportGetRequest, SportPostResponse>
 {

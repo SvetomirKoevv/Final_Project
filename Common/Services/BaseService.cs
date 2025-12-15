@@ -1,8 +1,10 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Reflection;
 using Common.Entities;
 using Common.Persistance;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Common.Services;
 
@@ -18,9 +20,26 @@ where T : BaseEntity
         itmes = _context.Set<T>();
     }
 
-    public async Task<List<T>> GetAll()
+    public async Task<List<T>> GetAll(params string[] includes)
     {
-        return await itmes.ToListAsync();
+        IQueryable<T> result = itmes;
+        Type type = typeof(T);
+        List<PropertyInfo> properties = type.GetProperties().ToList();
+
+        foreach (var include in includes)
+        {
+            PropertyInfo prop = properties
+                .FirstOrDefault(p => p.Name == include);
+
+            TypeInfo propertyType = prop.GetType().GetTypeInfo();
+            if (prop != null)
+            {
+                result = result.Include(x => EF.Property<T>(x, prop.Name));
+            }
+        }
+        List<T> res = await result.ToListAsync();
+
+        return await result.ToListAsync();
     }
     public async Task<List<T>> GetAllFiltered(
         Expression<Func<T, bool>> filter = null,
@@ -54,7 +73,7 @@ where T : BaseEntity
         return await itmes.FirstOrDefaultAsync(i => i.Id == id);
     }
 
-    public async Task Create(T item)
+    public virtual async Task Create(T item)
     {
         itmes.Add(item);
         await _context.SaveChangesAsync();

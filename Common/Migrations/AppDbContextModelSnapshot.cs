@@ -161,12 +161,27 @@ namespace Common.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Administrator"
+                            Name = "SuperAdmin"
                         },
                         new
                         {
                             Id = 2,
+                            Name = "Administrator"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = 4,
                             Name = "User"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Coach"
                         });
                 });
 
@@ -243,7 +258,7 @@ namespace Common.Migrations
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MembershipId")
+                    b.Property<int?>("MembershipId")
                         .HasColumnType("int");
 
                     b.Property<string>("Password")
@@ -386,8 +401,7 @@ namespace Common.Migrations
                     b.HasOne("Common.Entities.BEntities.Membership", null)
                         .WithMany()
                         .HasForeignKey("MembershipId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Common.Entities.MTMTables.CoachSports", b =>

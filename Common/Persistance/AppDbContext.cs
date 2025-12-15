@@ -22,7 +22,7 @@ public class AppDbContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
-            optionsBuilder.UseSqlServer("Data Source=DESKTOP-RD8LV0K;User ID=svetomir;Password=svetomir;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer("Data Source=DESKTOP-RD8LV0K;DataBase=SportsDb;User ID=svetomir;Password=svetomir;TrustServerCertificate=True;");
        
         base.OnConfiguring(optionsBuilder);
     }
@@ -41,6 +41,7 @@ public class AppDbContext : DbContext
             .HasOne<Membership>()
             .WithMany()
             .HasForeignKey(user => user.MembershipId)
+            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<User>()
@@ -185,8 +186,11 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Role>()
             .HasData(
-                new Role { Id = 1, Name = "Administrator" },
-                new Role { Id = 2, Name = "User" }
+                new Role { Id = 1, Name = "SuperAdmin" },
+                new Role { Id = 2, Name = "Administrator" },
+                new Role { Id = 3, Name = "Manager" },
+                new Role { Id = 4, Name = "User" },
+                new Role { Id = 5, Name = "Coach" }
             );
 
         modelBuilder.Entity<Membership>()

@@ -8,6 +8,7 @@ using Common.Entities;
 using Common.Entities.Other;
 using Common.Services;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

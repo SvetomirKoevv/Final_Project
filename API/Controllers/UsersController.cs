@@ -1,12 +1,9 @@
 using System.Linq.Expressions;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using API.Infrastructure.RequestDTOs;
 using API.Infrastructure.RequestDTOs.User;
 using API.Infrastructure.ResponseDTOs.User;
 using API.Services;
 using Common.Entities.BEntities;
-using Common.Entities.Other;
 using Common.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,19 +11,18 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(Roles = "SuperAdmin, Administrator")]
 [Route("api/[controller]")]
 public class UsersController : BaseController<User, UsersService, UserRequest, UserGetRequest, UserPostResponse>
 {
     override protected void PopulateRequest(User entity, UserRequest request)
     {
-
         entity.Username = request.Username;
         entity.FirstName = request.FirstName;
         entity.LastName = request.LastName;
         entity.Email = request.Email;
         entity.Password = request.Password;
-        entity.MembershipId = 2;
+        entity.Phone = request.Phone;
     }
     override protected void PopulateResponse(User entity, UserPostResponse response)
     {

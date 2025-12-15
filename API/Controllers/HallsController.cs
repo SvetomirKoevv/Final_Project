@@ -3,11 +3,13 @@ using API.Infrastructure.RequestDTOs.Hall;
 using API.Infrastructure.ResponseDTOs.Hall;
 using Common.Entities.BEntities;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
+[Authorize(Roles = "Administrator, Manager, Coach")]
 [Route("api/[controller]")]
 public class HallsController : BaseController<Hall, HallService, HallRequest, HallGetRequest, HallPostResponse>
 {

@@ -3,11 +3,13 @@ using API.Infrastructure.RequestDTOs.TrainingSession;
 using API.Infrastructure.ResponseDTOs.TrainingSessionP;
 using Common.Entities.BEntities;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
+[Authorize(Roles = "Administrator, Manager, Coach")]
 [Route("api/[controller]")]
 public class TrainingSessionsController : BaseController<TrainingSession, TrainingSessionService, TrainingSessionRequest, TrainingSessionGetRequest, TrainingSessionPostResponse>
 {

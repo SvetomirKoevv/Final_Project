@@ -3,11 +3,13 @@ using API.Infrastructure.RequestDTOs.Role;
 using API.Infrastructure.ResponseDTOs.Role;
 using Common.Entities.BEntities;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
+[Authorize(Roles = "SuperAdmin")]
 [Route("api/[controller]")]
 public class RolesController : BaseController<Role, RoleService, RoleRequest, RoleGetRequest, RolePostResponse>
 {

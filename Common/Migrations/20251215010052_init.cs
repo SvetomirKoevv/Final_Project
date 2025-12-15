@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace Common.Migrations
 {
     /// <inheritdoc />
@@ -281,6 +283,33 @@ namespace Common.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Memberships",
+                columns: new[] { "Id", "DurationDays", "Name", "Price" },
+                values: new object[] { 1, 2147483647, "Worker", 0m });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "SuperAdmin" },
+                    { 2, "Administrator" },
+                    { 3, "Manager" },
+                    { 4, "User" },
+                    { 5, "Coach" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "Email", "FirstName", "LastName", "MembershipId", "Password", "Phone", "Username" },
+                values: new object[] { 1, "email@gmail.com", "Admin", "Adminov", 1, "adminpass", "0888888888", "admin" });
+
+            migrationBuilder.InsertData(
+                table: "UserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[] { 1, 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_TrainingSessionId",

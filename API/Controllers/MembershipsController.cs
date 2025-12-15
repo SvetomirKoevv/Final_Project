@@ -3,11 +3,13 @@ using API.Infrastructure.RequestDTOs.Membership;
 using API.Infrastructure.ResponseDTOs.Membership;
 using Common.Entities.BEntities;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
+[Authorize(Roles = "Administrator")]
 [Route("api/[controller]")]
 public class MembershipsController : BaseController<Membership, MembershipService, MembershipRequest, MembershipGetRequest, MembershipPostResponse>
 {

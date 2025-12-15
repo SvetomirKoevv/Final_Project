@@ -3,11 +3,13 @@ using API.Infrastructure.RequestDTOs.Equipment;
 using API.Infrastructure.ResponseDTOs.Equipment;
 using Common.Entities.BEntities;
 using Common.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
 [ApiController]
+[Authorize(Roles = "Administrator, Manager, Coach")]
 [Route("api/[controller]")]
 public class EquipmentsController : BaseController<Equipment, EquipmentService, EquipmentRequest, EquipmentGetRequest, EquipmentPostResponse>
 {

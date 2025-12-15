@@ -3,9 +3,11 @@ using API.Infrastructure.ResponseDTOs.Auth;
 using API.Services;
 using Common.Entities.BEntities;
 using Common.Entities.Other;
+using Common.Persistance;
 using Common.Services;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers;
 
@@ -14,7 +16,7 @@ namespace API.Controllers;
 public class AuthController : ControllerBase
 {
     [HttpPost]
-    public IActionResult CreateToken([FromBody] AuthRequest model)
+    public async Task<IActionResult> CreateToken([FromBody] AuthRequest model)
     {
         ValidationResult result = new AuthRequestValidator().Validate(model);
 
@@ -25,7 +27,7 @@ public class AuthController : ControllerBase
 
         UsersService service = new UsersService();
 
-        User user = service.GetAll()
+        User user = (await service.GetAll("Roles"))
             .FirstOrDefault(u => u.Username == model.Username && u.Password == model.Password);
 
         if (user == null)

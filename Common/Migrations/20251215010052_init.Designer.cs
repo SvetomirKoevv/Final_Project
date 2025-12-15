@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Common.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251204005311_init")]
+    [Migration("20251215010052_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -134,6 +134,15 @@ namespace Common.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Memberships");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DurationDays = 2147483647,
+                            Name = "Worker",
+                            Price = 0m
+                        });
                 });
 
             modelBuilder.Entity("Common.Entities.BEntities.Role", b =>
@@ -150,6 +159,33 @@ namespace Common.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "SuperAdmin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Administrator"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "User"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Coach"
+                        });
                 });
 
             modelBuilder.Entity("Common.Entities.BEntities.Sport", b =>
@@ -242,6 +278,19 @@ namespace Common.Migrations
                     b.HasIndex("MembershipId");
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "email@gmail.com",
+                            FirstName = "Admin",
+                            LastName = "Adminov",
+                            MembershipId = 1,
+                            Password = "adminpass",
+                            Phone = "0888888888",
+                            Username = "admin"
+                        });
                 });
 
             modelBuilder.Entity("Common.Entities.MTMTables.CoachSports", b =>
@@ -305,6 +354,13 @@ namespace Common.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            UserId = 1
+                        });
                 });
 
             modelBuilder.Entity("Common.Entities.BEntities.Booking", b =>

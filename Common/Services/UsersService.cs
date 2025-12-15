@@ -7,6 +7,14 @@ namespace Common.Services;
 
 public class UsersService : BaseService<User>
 {
+    public override async Task Create(User item)
+    {
+        Role defaultRole = await _context.Roles.FindAsync(4);
+        item.Roles = new List<Role> { defaultRole };
+
+        _context.Users.Add(item);
+        await _context.SaveChangesAsync();
+    }
     public async Task AddRoleAsync(int userId, int roleId)
     {
         bool exists = await _context.UserRoles
