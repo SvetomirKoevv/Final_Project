@@ -20,7 +20,7 @@ where T : BaseEntity
         itmes = _context.Set<T>();
     }
 
-    public async Task<List<T>> GetAll(params string[] includes)
+    public List<T> GetAll(params string[] includes)
     {
         IQueryable<T> result = itmes;
         Type type = typeof(T);
@@ -37,11 +37,11 @@ where T : BaseEntity
                 result = result.Include(x => EF.Property<T>(x, prop.Name));
             }
         }
-        List<T> res = await result.ToListAsync();
+        List<T> res = result.ToList();
 
-        return await result.ToListAsync();
+        return result.ToList();
     }
-    public async Task<List<T>> GetAllFiltered(
+    public List<T> GetAllFiltered(
         Expression<Func<T, bool>> filter = null,
         string sortProperty = null,
         bool sortAscending = true,
@@ -60,38 +60,38 @@ where T : BaseEntity
             query = query.OrderByDescending(e => EF.Property<object>(e, sortProperty));
         }
 
-        var result = await query
+        var result = query
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
-            .ToListAsync();
+            .ToList();
         
         return result;
     }
 
-    public async Task<T> GetById(int id)
+    public T GetById(int id)
     {
-        return await itmes.FirstOrDefaultAsync(i => i.Id == id);
+        return itmes.FirstOrDefault(i => i.Id == id);
     }
 
-    public virtual async Task Create(T item)
+    public virtual void Create(T item)
     {
         itmes.Add(item);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 
-    public async Task Update(T item)
+    public void Update(T item)
     {
         itmes.Update(item);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 
-    public async Task<T> Delete(int id)
+    public T Delete(int id)
     {
-        T item = await GetById(id);
+        T item = GetById(id);
         if (item != null)
         {
             itmes.Remove(item);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
         return item;
     }

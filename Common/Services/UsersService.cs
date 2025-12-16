@@ -7,42 +7,42 @@ namespace Common.Services;
 
 public class UsersService : BaseService<User>
 {
-    public override async Task Create(User item)
+    public override void Create(User item)
     {
-        Role defaultRole = await _context.Roles.FindAsync(4);
+        Role defaultRole = _context.Roles.Find(item.Roles.First().Id);
         item.Roles = new List<Role> { defaultRole };
 
         _context.Users.Add(item);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
-    public async Task AddRoleAsync(int userId, int roleId)
+    public void AddRole(int userId, int roleId)
     {
-        bool exists = await _context.UserRoles
-            .AnyAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        bool exists = _context.UserRoles
+            .Any(ur => ur.UserId == userId && ur.RoleId == roleId);
 
         if (!exists)
         {
             _context.UserRoles.Add(new UserRoles { UserId = userId, RoleId = roleId });
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 
-    public async Task RemoveRoleAsync(int userId, int roleId)
+    public void RemoveRole(int userId, int roleId)
     {
-        UserRoles entity = await _context.UserRoles
-            .FirstOrDefaultAsync(ur => ur.UserId == userId && ur.RoleId == roleId);
+        UserRoles entity = _context.UserRoles
+            .FirstOrDefault(ur => ur.UserId == userId && ur.RoleId == roleId);
 
         if (entity != null)
         {
             _context.UserRoles.Remove(entity);
-            await _context.SaveChangesAsync();
+            _context.SaveChanges();
         }
     }
 
-    public async Task ChangeMembershipAsync(int userId, int membershipId)
+    public void ChangeMembership(int userId, int membershipId)
     {
-        User user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        User user = _context.Users.FirstOrDefault(u => u.Id == userId);
         user.MembershipId = membershipId;
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
     }
 }

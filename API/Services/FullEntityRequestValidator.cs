@@ -11,7 +11,7 @@ where E : BaseEntity, new()
 where TService : BaseService<T>, new()
 where EService : BaseService<E>, new()
 {
-    public async Task<ValidationModel<int>> Validate(int tId, int eId)
+    public ValidationModel<int> Validate(int tId, int eId)
     {
         if (tId <= 0)
         {
@@ -48,7 +48,7 @@ where EService : BaseService<E>, new()
         }
 
         TService tService = new TService();
-        T t = await tService.GetById(tId);
+        T t = tService.GetById(tId);
 
         if (t == null)
         {
@@ -68,7 +68,7 @@ where EService : BaseService<E>, new()
         }
 
         EService eService = new EService();
-        E e = await eService.GetById(eId);
+        E e = eService.GetById(eId);
 
         if (e == null)
         {

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Security.Claims;
 using API.Infrastructure.RequestDTOs;
 using API.Infrastructure.RequestDTOs.User;
 using API.Infrastructure.ResponseDTOs.User;
@@ -21,8 +22,16 @@ public class UsersController : BaseController<User, UsersService, UserRequest, U
         entity.FirstName = request.FirstName;
         entity.LastName = request.LastName;
         entity.Email = request.Email;
-        entity.Password = request.Password;
+        entity.Password = AuthService.HashPassword(entity, request.Password);
         entity.Phone = request.Phone;
+        
+        int loggedInUserRoleId = int.Parse(User.Claims.First(x => x.Type == "roleId").Value);
+        request.RoleId = request.RoleId >= loggedInUserRoleId ? request.RoleId : loggedInUserRoleId;
+        
+        entity.Roles = new List<Role>
+        {
+            new Role { Id = request.RoleId }
+        };
     }
     override protected void PopulateResponse(User entity, UserPostResponse response)
     {
@@ -61,17 +70,17 @@ public class UsersController : BaseController<User, UsersService, UserRequest, U
 
     [HttpPost]
     [Route("{userId}/changeMembership")]
-    public async Task<IActionResult> ChangeMembership([FromRoute] int userId, [FromQuery] int membershipId)
+    public IActionResult ChangeMembership([FromRoute] int userId, [FromQuery] int membershipId)
     {
-        return await ReturnFromValidationModel<int, UserPostResponse>(
-            await new FullEntityRequestValidator<User, UsersService, Membership, MembershipService>()
+        return ReturnFromValidationModel<int, UserPostResponse>(
+            new FullEntityRequestValidator<User, UsersService, Membership, MembershipService>()
                 .Validate(userId, membershipId),
             new TwoIdsDelegate<UserPostResponse>(async (uId, mId) =>
             {
                 UsersService usersService = new UsersService();
-                await usersService.ChangeMembershipAsync(uId, mId);
+                usersService.ChangeMembership(uId, mId);
                 
-                User user = await usersService.GetById(uId);
+                User user = usersService.GetById(uId);
                 UserPostResponse userResponse = new UserPostResponse();
                 
                 PopulateResponse(user, userResponse);
@@ -83,19 +92,19 @@ public class UsersController : BaseController<User, UsersService, UserRequest, U
     [Route("{userId}/bookAppointment")]
     public async Task<IActionResult> BookAppointment([FromRoute] int userId, [FromQuery] int trainingSessionId)
     {
-        return await ReturnFromValidationModel<int, TrainingSession>(
-            await new FullEntityRequestValidator<User, UsersService, TrainingSession, TrainingSessionService>()
+        return ReturnFromValidationModel<int, TrainingSession>(
+            new FullEntityRequestValidator<User, UsersService, TrainingSession, TrainingSessionService>()
                 .Validate(userId, trainingSessionId),
             new TwoIdsDelegate<TrainingSession>(async (uId, tsId) =>
             {
                 UsersService usersService = new UsersService();
-                User user = await usersService.GetById(uId);
+                User user = usersService.GetById(uId);
 
                 TrainingSessionService trainingSessionService = new TrainingSessionService();
-                TrainingSession trainingSession = await trainingSessionService.GetById(tsId);
+                TrainingSession trainingSession = trainingSessionService.GetById(tsId);
                 
                 trainingSession.Users.Add(user);
-                await trainingSessionService.Update(trainingSession);
+                trainingSessionService.Update(trainingSession);
 
                 return ResultSetGenerator<TrainingSession>.Success(trainingSession);
             }));
@@ -106,15 +115,15 @@ public class UsersController : BaseController<User, UsersService, UserRequest, U
     [Route("{userId}/addRole")]
     public async Task<IActionResult> AddRole([FromRoute] int userId, [FromQuery] int roleId)
     {
-        return await ReturnFromValidationModel<int, UserPostResponse>(
-            await new FullEntityRequestValidator<User, UsersService, Role, RoleService>()
+        return ReturnFromValidationModel<int, UserPostResponse>(
+            new FullEntityRequestValidator<User, UsersService, Role, RoleService>()
                 .Validate(userId, roleId),
             new TwoIdsDelegate<UserPostResponse>(async (uId, rId) =>
             {
                 UsersService usersService = new UsersService();
-                await usersService.AddRoleAsync(userId, roleId);
+                usersService.AddRole(userId, roleId);
 
-                User user = await usersService.GetById(userId);
+                User user = usersService.GetById(userId);
                 UserPostResponse userResponse = new UserPostResponse();
                 PopulateResponse(user, userResponse);
                 return ResultSetGenerator<UserPostResponse>.Success(userResponse);
@@ -125,15 +134,15 @@ public class UsersController : BaseController<User, UsersService, UserRequest, U
     [Route("{userId}/removeRole")]
     public async Task<IActionResult> RemoveRole([FromRoute] int userId, [FromQuery] int roleId)
     {
-        return await ReturnFromValidationModel<int, UserPostResponse>(
-            await new FullEntityRequestValidator<User, UsersService, Role, RoleService>()
+        return ReturnFromValidationModel<int, UserPostResponse>(
+            new FullEntityRequestValidator<User, UsersService, Role, RoleService>()
                 .Validate(userId, roleId),
             new TwoIdsDelegate<UserPostResponse>(async (uId, rId) =>
             {
                 UsersService usersService = new UsersService();
-                await usersService.RemoveRoleAsync(userId, roleId);
+                usersService.RemoveRole(userId, roleId);
                 
-                User user = await usersService.GetById(userId);
+                User user = usersService.GetById(userId);
                 UserPostResponse userResponse = new UserPostResponse();
                 
                 PopulateResponse(user, userResponse);

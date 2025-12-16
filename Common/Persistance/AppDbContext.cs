@@ -38,11 +38,18 @@ public class AppDbContext : DbContext
             .HasKey(user => user.Id);
 
         modelBuilder.Entity<User>()
+            .HasIndex(user => user.Username)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
             .HasOne<Membership>()
             .WithMany()
             .HasForeignKey(user => user.MembershipId)
-            .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<User>()
+            .Property(x => x.MembershipId)
+            .IsRequired(false);
 
         modelBuilder.Entity<User>()
             .HasMany(u => u.Roles)
@@ -211,7 +218,7 @@ public class AppDbContext : DbContext
                 Username = "admin",
                 Phone = "0888888888",
                 Email = "email@gmail.com",
-                Password = "adminpass",
+                Password = "AQAAAAIAAYagAAAAEFn1+eW1e7Gq4Q9xQm3K8o3n0dXc8n4pXv8n9RZ2QyqZy9o0dC6w==",
                 MembershipId = 1
             });
 

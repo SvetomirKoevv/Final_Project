@@ -21,8 +21,6 @@ public static class ResultSetGenerator<T>
 
     public static ResultSet<T> Failure(T item, ValidationResult modelState)
     {
-        List<ResultSetError> errors = new List<ResultSetError>();
-
         var groupedErrors = modelState.Errors
                                 .GroupBy(x => x.PropertyName)
                                 .Select(g => new ResultSetError
@@ -36,7 +34,7 @@ public static class ResultSetGenerator<T>
         {
             IsSuccess = false,
             Data = item,
-            ErrorMessages = errors
+            ErrorMessages = groupedErrors.ToList()
         };
 
         return failure;

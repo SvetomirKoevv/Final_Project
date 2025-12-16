@@ -33,7 +33,7 @@ where EResponse : new()
     protected virtual Expression<Func<E, bool>> GetFilter(EGetRequest request)
     { return e => true; }
     [HttpGet]
-    public async Task<IActionResult> Get([FromBody]EGetRequest filterModel)
+    public IActionResult Get([FromBody]EGetRequest filterModel)
     {
         filterModel.Pager ??= new Pager();
 
@@ -47,7 +47,7 @@ where EResponse : new()
             : "Id";
 
         EService _service = new EService();
-        var items = await _service.GetAllFiltered(
+        var items = _service.GetAllFiltered(
             filter,
             filterModel.SortProperty,
             filterModel.SortAscending,
@@ -66,10 +66,10 @@ where EResponse : new()
 
     [HttpGet]
     [Route("{id}")]
-    public async Task<IActionResult> Get([FromRoute] int id)
+    public IActionResult Get([FromRoute] int id)
     {
         EService _service = new EService();
-        var item = await _service.GetById(id);
+        var item = _service.GetById(id);
 
         if (item == null)
         {
@@ -93,7 +93,7 @@ where EResponse : new()
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] ERequest model)
+    public IActionResult Post([FromBody] ERequest model)
     {
         ValidationResult result = ValidationService<ERequest>.Validate(model);
 
@@ -106,7 +106,7 @@ where EResponse : new()
         PopulateRequest(item, model);
 
         EService _service = new EService();
-        await _service.Create(item);
+        _service.Create(item);
 
         EResponse responseItem = new EResponse();
         PopulateResponse(item, responseItem);
@@ -117,7 +117,7 @@ where EResponse : new()
 
     [HttpPut]
     [Route("{id}")]
-    public async Task<IActionResult> Put([FromQuery] int id, [FromBody] ERequest model)
+    public IActionResult Put([FromQuery] int id, [FromBody] ERequest model)
     {
         ValidationResult result = ValidationService<ERequest>.Validate(model);
 
@@ -130,7 +130,7 @@ where EResponse : new()
         PopulateRequest(item, model);
       
         EService service = new EService();
-        await service.Update(item);
+        service.Update(item);
 
         EResponse responseItem = new EResponse();
         PopulateResponse(item, responseItem);
@@ -140,7 +140,7 @@ where EResponse : new()
 
     [HttpDelete]
     [Route("{id}")]
-    public async Task<IActionResult> Delete([FromQuery] int id)
+    public IActionResult Delete([FromQuery] int id)
     {
         if (id < 0)
             return BadRequest(ResultSetGenerator<int>
@@ -175,7 +175,7 @@ where EResponse : new()
                                 }
                             }));
 
-        E deletedItem = await _service.Delete(id);
+        E deletedItem = _service.Delete(id);
 
         EResponse response = new EResponse();
         PopulateResponse(deletedItem, response);
@@ -183,25 +183,25 @@ where EResponse : new()
         return Ok(ResultSetGenerator<EResponse>.Success(response));
     }
 
-    protected Task<IActionResult> ReturnFromValidationModel<V, R>(ValidationModel<V> validationModel, TwoIdsDelegate<R> delegate_)
+    protected IActionResult ReturnFromValidationModel<V, R>(ValidationModel<V> validationModel, TwoIdsDelegate<R> delegate_)
     {
         if (validationModel.ResponseType == "BadRequest")
         {
-            return Task.FromResult<IActionResult>(BadRequest(
+            return BadRequest(
                 ResultSetGenerator<V>.Failure(
                     validationModel.Data,
-                    validationModel.Errors)));
+                    validationModel.Errors));
         }
         else if (validationModel.ResponseType == "NotFound")
         {
-            return Task.FromResult<IActionResult>(NotFound(
+            return NotFound(
                 ResultSetGenerator<V>.Failure(
                     validationModel.Data,
-                    validationModel.Errors)));
+                    validationModel.Errors));
         }
 
         R result = (R)delegate_.DynamicInvoke();
         
-        return Task.FromResult<IActionResult>(Ok(ResultSetGenerator<R>.Success(result)));
+        return Ok(ResultSetGenerator<R>.Success(result));
     }
 }

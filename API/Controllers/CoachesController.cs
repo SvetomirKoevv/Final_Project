@@ -46,10 +46,10 @@ public class CoachesController : BaseController<Coach, CoachService, CoachReques
 
     [HttpPut]
     [Route("{coachId}/addSport")]
-    public async Task<IActionResult> AddSportToCoach([FromRoute] int coachId, [FromQuery] int sportId)
+    public IActionResult AddSportToCoach([FromRoute] int coachId, [FromQuery] int sportId)
     {
-        return await ReturnFromValidationModel<int, CoachSports>(
-            await new FullEntityRequestValidator<Coach, CoachService, Sport, SportService>()
+        return ReturnFromValidationModel<int, CoachSports>(
+            new FullEntityRequestValidator<Coach, CoachService, Sport, SportService>()
                 .Validate(coachId, sportId),
             new TwoIdsDelegate<CoachSports>(async (cId, sId) =>
             {
